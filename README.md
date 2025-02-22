@@ -1,1 +1,2 @@
-# calculator-huzin-mr
+# Calculator
+A simple calculator program in C.
