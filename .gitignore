@@ -1,2 +1,7 @@
+build/
+app.exe
+unit-tests.exe
 *.o
+venv/
+googletest/*.o
 a.out
