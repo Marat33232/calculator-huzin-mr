@@ -1,0 +1,57 @@
+#include <gtest/gtest.h>
+extern "C" {
+    #include "../src/main.c"
+}
+
+// Тестирование функции parse_number
+TEST(CalculatorTest, ParseNumber) {
+    int index = 0;
+    EXPECT_DOUBLE_EQ(parse_number("123", &index), 123); // Простое число
+    EXPECT_DOUBLE_EQ(parse_number("456.789", &index), 456.789); // Число с плавающей точкой
+    EXPECT_DOUBLE_EQ(parse_number("0", &index), 0); // Нулевое значение
+    EXPECT_DOUBLE_EQ(parse_number("9999", &index), 9999); // Максимальное целое число
+    EXPECT_DOUBLE_EQ(parse_number("0.0001", &index), 0.0001); // Маленькое дробное число
+}
+
+// Тестирование функции apply_operator
+TEST(CalculatorTest, ApplyOperator) {
+    EXPECT_DOUBLE_EQ(apply_operator(5, 3, '+'), 8); // Сложение
+    EXPECT_DOUBLE_EQ(apply_operator(5, 3, '-'), 2); // Вычитание
+    EXPECT_DOUBLE_EQ(apply_operator(5, 3, '*'), 15); // Умножение
+    EXPECT_DOUBLE_EQ(apply_operator(5, 3, '/'), 5 / 3); // Деление
+
+    // Деление на ноль должно вызывать ошибку
+    EXPECT_DEATH(apply_operator(5, 0, '/'), "Деление на ноль");
+}
+
+// Тестирование функции evaluate_expression
+TEST(CalculatorTest, EvaluateExpressionIntegerMode) {
+    EXPECT_DOUBLE_EQ(evaluate_expression("5 + 3", 0), 8); // Сложение
+    EXPECT_DOUBLE_EQ(evaluate_expression("5 - 3", 0), 2); // Вычитание
+    EXPECT_DOUBLE_EQ(evaluate_expression("5 * 3", 0), 15); // Умножение
+    EXPECT_DOUBLE_EQ(evaluate_expression("5 / 3", 0), 1); // Целочисленное деление
+
+    // Тестирование сложных выражений
+    EXPECT_DOUBLE_EQ(evaluate_expression("(5 + 3) * 2", 0), 16); // Скобки и приоритет операторов
+    EXPECT_DOUBLE_EQ(evaluate_expression("10 / (2 + 3)", 0), 2); // Деление с использованием скобок
+    EXPECT_DOUBLE_EQ(evaluate_expression("10 + 5 * 2", 0), 20); // Приоритет умножения над сложением
+}
+
+TEST(CalculatorTest, EvaluateExpressionFloatMode) {
+    EXPECT_DOUBLE_EQ(evaluate_expression("5 + 3", 1), 8); // Сложение
+    EXPECT_DOUBLE_EQ(evaluate_expression("5 - 3", 1), 2); // Вычитание
+    EXPECT_DOUBLE_EQ(evaluate_expression("5 * 3", 1), 15); // Умножение
+    EXPECT_DOUBLE_EQ(evaluate_expression("5 / 3", 1), 1.6667); // Деление с плавающей точкой
+
+    // Тестирование сложных выражений
+    EXPECT_DOUBLE_EQ(evaluate_expression("(5 + 3) * 2", 1), 16); // Скобки и приоритет операторов
+    EXPECT_DOUBLE_EQ(evaluate_expression("10 / (2 + 3)", 1), 2); // Деление с использованием скобок
+    EXPECT_DOUBLE_EQ(evaluate_expression("10 + 5 * 2", 1), 20); // Приоритет умножения над сложением
+}
+
+// Тестирование недопустимых символов
+TEST(CalculatorTest, InvalidCharacters) {
+    EXPECT_DEATH(evaluate_expression("5 + a", 0), "Неизвестный оператор"); // Недопустимый символ 'a'
+    EXPECT_DEATH(evaluate_expression("5 @ 3", 0), "Неизвестный оператор"); // Недопустимый символ '@'
+    EXPECT_DEATH(evaluate_expression("5 / 0", 0), "Деление на ноль"); // Деление на ноль
+}
